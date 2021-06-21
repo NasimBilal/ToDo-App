@@ -1,40 +1,40 @@
 import React, {useState} from 'react';
 import './App.css';
-import {FormControl, Input, InputLabel, Fab, AppBar, Toolbar, Typography, makeStyles, Button, Dialog, DialogTitle, DialogActions} from '@material-ui/core'
+import {FormControl,FormControlLabel,Switch, Input, InputLabel, Fab, AppBar, Toolbar, Typography, 
+  makeStyles, Accordion, AccordionSummary, AccordionDetails} from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add';
 import DeleteOutlineRoundedIcon from '@material-ui/icons/DeleteOutlineRounded';
-import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
-import { red } from '@material-ui/core/colors';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
     margin: 5,
   },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
   title: {
     flexGrow: 1,
   },
-  dialog: {
-    width: 200,
-    backgroundColor: red,
+  accordion: {
+    width: '50%',
+    margin: 'auto',
   }
 }));
 
 function App(){
-
-  const [open, setOpen] = useState(false);
 
   const [input, setInput] = useState('');
 
   const [add, setAdd] = useState([]);
   
   const [deleted, setDeleted] = useState([]);
-  
 
-  const [done, setDone] = useState([]);
+  const [done, setDone] = useState();
   
-  const add_item = (event) => {
-    event.preventDefault();
+  const add_item = () => {
     setAdd([...add, input])
     setInput('');
   }
@@ -44,20 +44,13 @@ function App(){
       return;
     }
     setDeleted([...deleted, add.splice(w,1)]);
-    setAdd([...add]);
+    console.log(deleted)
   }
 
-  const done_task =(d)=>{
-    setDone([...done, add.splice(d,1)])
-  }
-  
-  const handleClickOpen = () => {
-    setOpen(true);
-  }
-
-  const handleClose = () => {
-    setOpen(false);
-  }
+  const handleChange = (event) => {
+    event.preventDefault()
+    setDone(event.target.checked);
+  };
 
   const classes = useStyles();
   
@@ -79,46 +72,46 @@ function App(){
           add.map((obj,i)=>{
           return(
             <div className={classes.root}>
-            <AppBar position="static" color="primary">
-              <Toolbar>
-                <Typography variant="h6" className={classes.title}>
-                  {obj}
-                </Typography>
-                <DoneOutlineIcon className="done" onClick={()=>{done_task(i)}}/>
-                <DeleteOutlineRoundedIcon className="remove" onClick={()=>{remove_task(i)}}/>
-              </Toolbar>
-            </AppBar>
-          </div>
+              <AppBar position="static" color="primary">
+                <Toolbar>
+                  <Typography variant="h6" className={classes.title}>
+                    {obj}
+                  </Typography>
+                  <FormControlLabel
+                  control={<Switch checked={done} onChange={handleChange} name="done" />}
+                  label="Completed"
+                  />
+                  <DeleteOutlineRoundedIcon className="remove" onClick={()=>{remove_task(i)}}/>
+                </Toolbar>
+              </AppBar>
+            </div>
           )})
         }
       </div>
-      <Button onClick={handleClickOpen}>Open Completed Tasks</Button>
-      <Dialog open={open} onClose={handleClose}>
-        {
-          done.map((object)=>{
-            return(
-              <DialogTitle className={classes.dialog}><li>{object}</li></DialogTitle>
-            )
-          })
-        }
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">Ok</Button>
-      </DialogActions>
-      </Dialog>
-
-      <Button disabled={!deleted} onClick={handleClickOpen}>Open Cancelled Tasks</Button>
-      <Dialog  disableBackdropClick disableEscapeKeyDown open={open} onClose={handleClose}>
-      {
-        deleted.map((object)=>{
-          return(
-            <DialogTitle className={classes.dialog}><li>{object}</li></DialogTitle>
-          )
-        })
-      }
-      <DialogActions>
-        <Button onClick={handleClose} color="primary">Ok</Button>
-      </DialogActions>
-      </Dialog>
+      <div className={classes.accordion}>
+        <Accordion>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography className={classes.heading}>Deleted Tasks</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography>
+              {
+                deleted.map((object)=>{
+                  return(
+                    <div className="deleted">
+                    <p>{object}</p>
+                  </div>
+                  )
+                })
+              }
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
+      </div>
     </div>
   )
 }
